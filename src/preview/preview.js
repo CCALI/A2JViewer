@@ -14,9 +14,14 @@ import parseGuideToMobile from '~/src/mobile/util/guide-to-mobile'
 
 export const ViewerPreviewVM = DefineMap.extend('ViewerPreviewVM', {
   // passed in via viewer-preview-layout.stache bindings
+  previewState: {
+    set (previewState) {
+      console.log('previewState', previewState)
+      return previewState
+    }
+  },
   resumeEdit: {},
   guidePath: {},
-  showDebugPanel: {},
   previewPageName: {},
   // passed up to Author app-state via viewer-preview-layout.stache bindings
   traceMessage: {},
@@ -71,7 +76,7 @@ export const ViewerPreviewVM = DefineMap.extend('ViewerPreviewVM', {
 
     appState.interview = interview
     appState.resumeEdit = vm.resumeEdit
-    appState.showDebugPanel = vm.showDebugPanel
+    appState.showDebugPanel = vm.previewState.showDebugPanel
 
     // restore Author messageLog
     if (vm.traceMessage) {
@@ -80,7 +85,10 @@ export const ViewerPreviewVM = DefineMap.extend('ViewerPreviewVM', {
     }
 
     const showDebugPanelHandler = (ev, showDebugPanel) => {
-      vm.showDebugPanel = showDebugPanel
+      console.log('setting showDebug', vm.previewState)
+      if (vm.previewState ) {
+        vm.previewState.showDebugPanel = showDebugPanel
+      }
     }
     appState.listenTo('showDebugPanel', showDebugPanelHandler)
 

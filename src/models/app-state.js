@@ -233,8 +233,8 @@ export const ViewerAppState = DefineMap.extend('ViewerAppState', {
     // TODO: move this to helpers util and handle vm reference?
     // depends on html, answers, and logic.eval
     const parseTextHelper = (html) => {
-      // re-eval if answer values have updated via beforeCode'
-      const answersChanged = vm.answers.serialize() // eslint-disable-line
+      // re-eval if answer values have updated via beforeCode
+      const answersChanged = vm.answers && vm.answers.revision // eslint-disable-line
       return (html && vm.logic) && vm.logic.eval(html)
     }
     stache.registerHelper('parseText', parseTextHelper)

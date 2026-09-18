@@ -663,7 +663,8 @@ export default Component.extend('FieldComponent', {
           str = typeof str === 'function' ? str() : str
           // re-eval if answer values have updated via beforeCode
           const interview = self.logic.interview
-          const answersChanged = interview && interview.answers.serialize() // eslint-disable-line
+          const answers = interview && interview.answers
+          const answersChanged = answers && answers.revision // eslint-disable-line
 
           return self.logic.eval(str)
         },

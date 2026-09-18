@@ -62,7 +62,7 @@ export const VisitedPage = DefineMap.extend('VisitedPage', {
   display: {
     get () {
       // re-eval if answer values have updated via beforeCode
-      const answersChanged = this.answers && this.answers.serialize() // eslint-disable-line
+      const answersChanged = this.answers && this.answers.revision // eslint-disable-line
       const questionText = this.interviewPage.text || ''
       // logic needs to be refactored from the old global into a util module. passing it context for the ORDINAL helper
       // and other macros would require modifying much of the legacy callstack. This is not a proper way to do this but

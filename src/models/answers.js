@@ -6,11 +6,36 @@ import cString from '@caliorg/a2jdeps/utils/string'
 import cDate from '@caliorg/a2jdeps/utils/date'
 import readableList from '~/src/util/readable-list'
 
+const boundForRevision = new WeakSet()
+const skipRevisionKeys = { revision: true, lang: true }
+
+function onPatches (observable, handler) {
+  if (!observable || boundForRevision.has(observable)) {
+    return
+  }
+  if (typeof canReflect.onPatches !== 'function') {
+    return
+  }
+  boundForRevision.add(observable)
+  canReflect.onPatches(observable, handler)
+}
+
 export default DefineMap.extend('AnswersModel', { seal: false }, {
   '*': Answer,
 
   lang: {
     Type: DefineMap,
+    serialize: false
+  },
+
+  /**
+   * Cheap observable token incremented when any answer value changes.
+   * Bind to this instead of answers.serialize() so templates do not walk
+   * the entire answer map on every keystroke.
+   */
+  revision: {
+    type: 'number',
+    default: 0,
     serialize: false
   },
 
@@ -36,6 +61,7 @@ export default DefineMap.extend('AnswersModel', { seal: false }, {
     })
 
     canReflect.setKeyValue(this, varNameKey, newAnswer)
+    this.bindAnswer(newAnswer)
 
     return newAnswer
   },
@@ -144,7 +170,60 @@ export default DefineMap.extend('AnswersModel', { seal: false }, {
       canReflect.setKeyValue(varAnswerModel.values, varIndex, varVal)
     }
 
+    this.bumpRevision()
+
     // courtesy return for tests
     return varAnswerModel
+  },
+
+  bumpRevision () {
+    this.revision += 1
+  },
+
+  bindAnswer (answer) {
+    if (!answer || typeof answer !== 'object') {
+      return
+    }
+
+    const bump = () => this.bumpRevision()
+
+    onPatches(answer, (patches) => {
+      patches.forEach((patch) => {
+        if (patch.key === 'values' && patch.value) {
+          onPatches(patch.value, bump)
+        }
+      })
+      bump()
+    })
+
+    if (answer.values) {
+      onPatches(answer.values, bump)
+    }
+  },
+
+  init () {
+    const bindAndBump = (patches) => {
+      let shouldBump = false
+      patches.forEach((patch) => {
+        if (skipRevisionKeys[patch.key]) {
+          return
+        }
+        shouldBump = true
+        const value = patch.value !== undefined ? patch.value : this[patch.key]
+        this.bindAnswer(value)
+      })
+      if (shouldBump) {
+        this.bumpRevision()
+      }
+    }
+
+    onPatches(this, bindAndBump)
+
+    canReflect.eachKey(this, (value, key) => {
+      if (skipRevisionKeys[key]) {
+        return
+      }
+      this.bindAnswer(value)
+    })
   }
 })

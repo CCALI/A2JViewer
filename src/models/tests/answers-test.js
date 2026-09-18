@@ -29,6 +29,20 @@ describe('Answers Model', function () {
     assert.isFalse(langInstanceOfAnswer, 'passed in lang prop should NOT be an Answer Model')
   })
 
+  it('revision is a cheap change token omitted from serialize', function () {
+    answers.varCreate('Foo', 'Text', false)
+    const afterCreate = answers.revision
+    assert.isNumber(afterCreate, 'revision should be a number, not an Answer')
+    assert.notProperty(answers.serialize(), 'revision', 'revision should not serialize into answer data')
+
+    answers.varSet('foo', 'bar', 1)
+    assert.isAbove(answers.revision, afterCreate, 'varSet should bump revision')
+
+    const beforeValuesSet = answers.revision
+    answers.foo.values.set(1, 'baz')
+    assert.isAbove(answers.revision, beforeValuesSet, 'nested values.set should bump revision')
+  })
+
   it('serialize', () => {
     answers.varCreate('Foo', 'Text', false)
     let expectedResult = {'foo': { name: 'Foo', type: 'Text', repeating: false, values: [null] }}

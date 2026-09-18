@@ -1,10 +1,11 @@
 {
   "name": "@caliorg/a2jviewer",
-  "version": "8.4.1",
+  "version": "8.5.0",
   "description": "A2J Viewer standalone and preview app.",
   "main": "a2jviewer/app",
   "scripts": {
     "lint": "standard --fix --env mocha",
+    "dev": "node scripts/build.local.js npx http-server dist_local && npx http-server dist_local",
     "test": "npm run lint && testee --reporter Spec --browsers firefox tests/index.html",
     "build": "grunt build --gruntfile=Gruntfile.js",
     "deploy": "npm i && npm run build && mv index.html index.dev.html && mv index.production.html index.html",

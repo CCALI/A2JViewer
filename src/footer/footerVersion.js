@@ -1,6 +1,6 @@
 
 const version = {
-  number: '8.4.1',
+  number: '8.5.0',
   date: '2026-09-18'
 }
 
